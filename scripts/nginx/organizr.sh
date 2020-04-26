@@ -7,6 +7,11 @@
 #   changes/dates in source files. Any modifications to our software
 #   including (via compiler) GPL-licensed code must also be made available
 #   under the GPL along with build & install instructions.
+if [[ -f /tmp/.install.lock ]]; then
+  export log="/root/logs/install.log"
+else
+  log="/root/logs/swizzin.log"
+fi
 
 if [[ ! -f /install/.nginx.lock ]]; then
   echo "nginx does not appear to be installed, ruTorrent requires a webserver to function. Please install nginx first before installing this package."
@@ -21,9 +26,9 @@ if [[ $phpversion == '7.0' ]]; then
   exit 1
 fi
 
-users=($(cut -d: -f1 < /etc/htpasswd))
-
 export DEBIAN_FRONTEND=noninteractive
+
+###################################
 
 echo "Fetching Updates"
 apt-get update -y -q >> $log 2>&1
@@ -32,6 +37,7 @@ apt-get install -y -q php-mysql php-sqlite3 sqlite3 php-xml php-zip openssl php-
 
 
 if [[ ! -d /srv/organizr ]]; then
+  echo "Cloning the Organizr Repo"
   git clone https://github.com/causefx/Organizr /srv/organizr >> $log 2>&1
   chown -R www-data:www-data /srv/organizr
 fi
@@ -39,6 +45,7 @@ fi
 phpv=$(php_v_from_nginxconf)
 sock="php${phpv}-fpm"
 
+echo "Installing Nginx Config"
 if [[ ! -f /etc/nginx/apps/organizr.conf ]]; then
 cat > /etc/nginx/apps/organizr.conf <<RUM
 location /organizr {
@@ -54,10 +61,9 @@ location /organizr {
 }
 RUM
 fi
-
+echo "Restarting PHP"
 . /etc/swizzin/sources/functions/php
 restart_php_fpm
 
 chown -R www-data:www-data /srv/organizr
 systemctl reload nginx
-touch /install/.organizr.lock

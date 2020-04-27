@@ -14,14 +14,17 @@ fi
 
 bash /usr/local/bin/swizzin/nginx/organizr.sh
 
-systemctl force-reload nginx
+systemctl reload nginx
 
 mkdir /srv/organizr_db -p
 chown -R www-data:www-data /srv/organizr_db  
 
+touch /install/.organizr.lock
+
+####### Databse bootstrapping
+
 user=$(cut -d: -f1 < /root/.master.info)
 pass=$(cut -d: -f2 < /root/.master.info)
-
 
 #TODO check that passwords with weird characters will send right
 if [[ $user == $pass ]]; then 
@@ -77,12 +80,15 @@ curl --location --request POST 'https://localhost/organizr/api/?v1/wizard_config
 -sk --user "$user":"$pass" \
 | python -m json.tool \
 >> $log 2>&1
-echo "Please allow up to 10 minutes for the organizr database to finish setting up in the background"
-echo "You can attempt to log in with no problem, however you will not be shown the dashboard until the process is done"
+  echo "Please restart your PHP service manually"
+
+# sleep 15
+
+# . /etc/swizzin/sources/functions/php 
+# restart_php_fpm
+# systemctl restart php7.2-fpm
 
 fi
- 
-
 
 
 touch /install/.organizr.lock

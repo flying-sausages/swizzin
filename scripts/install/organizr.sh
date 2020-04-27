@@ -50,8 +50,7 @@ API key = $api_key
 Hash key = $hash_key
 Registration pass = $reg_pass
 EOF
-#These are hardcoded for testing
-#TODO check username and password are not the same
+
 curl --location --request POST 'https://localhost/organizr/api/?v1/wizard_config' \
 --header 'content-type: application/x-www-form-urlencoded' \
 --header 'charset: UTF-8' \

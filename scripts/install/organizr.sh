@@ -25,11 +25,12 @@ curl -X POST \
 --data-urlencode "formKey=" \
 -H "Content-Type: application/x-www-form-urlencoded" \
 --user test:test \
--k \
+-k -s \
 https://localhost/organizr/api/?v1/wizard_path \
 | python -m json.tool >> $log 2>&1
 
 #These are hardcoded for testing
+#TODO check username and password are not the same
 curl -X POST \
 --data-urlencode "license=personal" \
 --data-urlencode "username=test" \
@@ -42,8 +43,8 @@ curl -X POST \
 --data-urlencode "location=/srv/organizr_db" \
 -H "Content-Type: application/x-www-form-urlencoded" \
 --user test:test \
--k \
-https://localhost/organizr/api/?v1/wizard_path \
+-k -s \
+https://localhost/organizr/api/?v1/wizard_config \
 | python -m json.tool >> $log 2>&1
 
 touch /install/.organizr.lock

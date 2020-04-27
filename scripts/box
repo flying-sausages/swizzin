@@ -303,7 +303,7 @@ function _deluser {
   echo
   read -rep 'Removal will start as soon as you confirm this message. Press enter to continue.'
   
-  for app in rtorrent rutorrent deluge autodl flood nzbget lounge; do
+  for app in rtorrent rutorrent deluge autodl flood nzbget lounge organizr; do
     if [[ $app = "rutorrent" ]]; then
       if [[ -d /srv/rutorrent ]]; then
         if [[ ! -f /install/.rutorrent.lock ]]; then touch /install/.rutorrent.lock; fi
@@ -322,6 +322,9 @@ function _deluser {
         rm -rf /etc/nginx/conf.d/${user}.deluge.conf
         eval systemctl disable ${app}@${user}
         eval systemctl stop ${app}@${user}
+      elif [[ $app = "Organizr" ]]; then
+        echo "Please make sure to remove the user from Organizr"
+        #TODO user deletion when the API works
       else
         systemctl disable ${app}@${user}
         systemctl stop ${app}@${user}

@@ -21,7 +21,7 @@ chown -R www-data:www-data /srv/organizr_db
 
 echo "Setting up the organizr database"
 curl -X POST \
---data-urlencode "path=/srv/organizr"\
+--data-urlencode "path=/srv/organizr_db" \
 --data-urlencode "formKey=" \
 -H "Content-Type: application/x-www-form-urlencoded" \
 --user test:test \

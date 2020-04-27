@@ -38,7 +38,7 @@ apt-get install -y -q php-mysql php-sqlite3 sqlite3 php-xml php-zip openssl php-
 
 if [[ ! -d /srv/organizr ]]; then
   echo "Cloning the Organizr Repo"
-  git clone https://github.com/causefx/Organizr /srv/organizr >> $log 2>&1
+  git clone https://github.com/causefx/Organizr /srv/organizr --depth 1 >> $log 2>&1
   chown -R www-data:www-data /srv/organizr
 fi
 

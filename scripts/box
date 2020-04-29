@@ -391,6 +391,10 @@ function _chpasswd {
     systemctl start deluged@${user}
     systemctl start deluge-web@${user}
   fi
+  if [[ -f /install/.organizr.lock ]]; then 
+    #TODO fix when API allows to
+    echo "Your organizr password has not yet been changed, please do so manually"
+  fi
 
 }
 

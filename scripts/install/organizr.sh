@@ -13,15 +13,13 @@ else
 fi
 
 bash /usr/local/bin/swizzin/nginx/organizr.sh
-
 systemctl reload nginx
-
-mkdir /srv/organizr_db -p
-chown -R www-data:www-data /srv/organizr_db  
 
 touch /install/.organizr.lock
 
 ####### Databse bootstrapping
+mkdir /srv/organizr_db -p
+chown -R www-data:www-data /srv/organizr_db  
 
 user=$(cut -d: -f1 < /root/.master.info)
 pass=$(cut -d: -f2 < /root/.master.info)
@@ -29,7 +27,7 @@ pass=$(cut -d: -f2 < /root/.master.info)
 #TODO check that passwords with weird characters will send right
 if [[ $user == $pass ]]; then 
   echo "Your username and password seem to be identical, please finish the Organizr setup manually."
-  else
+else
   echo "Setting up the organizr database"
   curl --location --request POST 'https://localhost/organizr/api/?v1/wizard_path' \
   --header 'content-type: application/x-www-form-urlencoded' \
@@ -80,12 +78,9 @@ EOF
   -sk --user "$user":"$pass" \
   | python -m json.tool \
   >> $log 2>&1
+    echo "You can use your credentials to log into organizr."
     echo "Please reload your PHP service manually, or wait until your OPcache empties"
-  # . /etc/swizzin/sources/functions/php 
-  # reload_php_fpm
-
 
 fi
-
 
 touch /install/.organizr.lock

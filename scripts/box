@@ -348,6 +348,10 @@ function _deluser {
 }
 
 function _chpasswd {
+  if [[ -z $2 ]]; then 
+    echo "Please epcify user"
+    return 1
+  fi
   user=$2
   echo -e "Enter new password for ${user}. Leave empty to generate a password"; read 'pass'
   if [[ -z "${pass}" ]]; then

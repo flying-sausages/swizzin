@@ -251,7 +251,7 @@ function _adduser {
   echo "D /var/run/${user} 0750 ${user} ${user} -" >> /etc/tmpfiles.d/${user}.conf
   systemd-tmpfiles /etc/tmpfiles.d/${user}.conf --create
 
-  for app in rtorrent rutorrent deluge autodl flood nzbget lounge transmission; do
+  for app in rtorrent rutorrent deluge autodl flood nzbget lounge transmission organizr; do
     if [[ $app = "rutorrent" ]]; then
       if [[ -d /srv/rutorrent ]]; then
         if [[ ! -f /install/.rutorrent.lock ]]; then touch /install/.rutorrent.lock; fi
@@ -261,6 +261,9 @@ function _adduser {
     if [[ -f /install/.${app}.lock ]]; then
       if [[ $app = "flood" ]]; then
         /usr/local/bin/swizzin/install/${app}.sh
+      elif [[ $app = "organizr" ]]; then
+        #TODO fix when organizr API can do this
+        echo "Please add the user to organizr manually"
       else
         /usr/local/bin/swizzin/install/${app}.sh ${user}
         if [[ $app = "deluge" ]]; then
@@ -310,7 +313,7 @@ function _deluser {
   echo
   read -rep 'Removal will start as soon as you confirm this message. Press enter to continue.'
   
-  for app in rtorrent rutorrent deluge autodl flood nzbget lounge transmission; do
+  for app in rtorrent rutorrent deluge autodl flood nzbget lounge transmission organizr; do
     if [[ $app = "rutorrent" ]]; then
       if [[ -d /srv/rutorrent ]]; then
         if [[ ! -f /install/.rutorrent.lock ]]; then touch /install/.rutorrent.lock; fi
@@ -331,6 +334,9 @@ function _deluser {
         eval systemctl stop ${app}@${user}
       elif [[ $app == "autodl" ]]; then
         systemctl disable --now irssi@${user}
+      elif [[ $app = "organizr" ]]; then
+        echo "Please make sure to remove the user from Organizr"
+        #TODO user deletion when the API works
       else
         systemctl disable ${app}@${user}
         systemctl stop ${app}@${user}
@@ -405,6 +411,10 @@ function _chpasswd {
   fi
   if [[ -f /install/.lounge.lock ]]; then 
     su -s /bin/sh lounge -c "thelounge reset $user " <<< "${pass}" > /dev/null
+  fi
+  if [[ -f /install/.organizr.lock ]]; then 
+    #TODO fix when API allows to
+    echo "Your organizr password has not yet been changed, please do so manually"
   fi
 
 }

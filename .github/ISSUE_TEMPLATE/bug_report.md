@@ -6,20 +6,12 @@ labels: ''
 assignees: ''
 
 ---
-<!--__  __      __    __               __
-   / / / /___  / /___/ /  __  ______  / /
-  / /_/ / __ \/ / __  /  / / / / __ \/ / 
- / __  / /_/ / / /_/ /  / /_/ / /_/ /_/  
-/_/ /_/\____/_/\__,_/   \__,_/ .___(_)   
-                            /_/          
+<!-- 
 Please read this first!
 
 - ISSUES THAT DO NOT FOLLOW THE FORMAT CAN BE AUTOMATICALLY CLOSED. 
-
 - Please search past issues before posting 
-
 - Please consult the documentation first, it includes valuable steps for troubleshooting. https://docs.swizzin.ltd/guides/troubleshooting 
-
 - If your issue is about the swizzin front PANEL, please post these issues into the correct repository here https://github.com/liaralabs/swizzin_dashboard/issues
 
 Thanks for your cooperation! Following this will help us help you better :)

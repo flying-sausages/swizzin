@@ -6,13 +6,25 @@ labels: ''
 assignees: ''
 
 ---
-<!-- ISSUES THAT DO NOT FOLLOW THE FORMAT CAN BE AUTOMATICALLY CLOSED. -->
+<!--__  __      __    __               __
+   / / / /___  / /___/ /  __  ______  / /
+  / /_/ / __ \/ / __  /  / / / / __ \/ / 
+ / __  / /_/ / / /_/ /  / /_/ / /_/ /_/  
+/_/ /_/\____/_/\__,_/   \__,_/ .___(_)   
+                            /_/          
+Please read this first!
 
-<!-- If your issue is about the SWIZZIN PANEL, please post these issues into the correct repository.-->
+- ISSUES THAT DO NOT FOLLOW THE FORMAT CAN BE AUTOMATICALLY CLOSED. 
 
-<!-- Please make sure to consult the documentation and follow some of the troubleshooting steps there. You can find it at https://docs.swizzin.ltd -->
+- Please search past issues before posting 
 
-## Did you read the above?
+- Please consult the documentation first, it includes valuable steps for troubleshooting. https://docs.swizzin.ltd/guides/troubleshooting 
+
+- If your issue is about the swizzin front PANEL, please post these issues into the correct repository here https://github.com/liaralabs/swizzin_dashboard/issues
+
+Thanks for your cooperation! Following this will help us help you better :)
+-->
+## Did you read the disclaimer?
 <!-- Put an x between the brackets -->
 - [] Yes I did
 

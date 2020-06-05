@@ -1,12 +1,20 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: ''
+title: '[Bug] '
 labels: ''
 assignees: ''
 
 ---
-# Please note that issues that do not follow the format to some degree can be automatically closed.
+<!-- ISSUES THAT DO NOT FOLLOW THE FORMAT CAN BE AUTOMATICALLY CLOSED. -->
+
+<!-- If your issue is about the SWIZZIN PANEL, please post these issues into the correct repository.-->
+
+<!-- Please make sure to consult the documentation and follow some of the troubleshooting steps there. You can find it at https://docs.swizzin.ltd -->
+
+## Did you read the above?
+<!-- Put an x between the brackets -->
+- [] Yes I did
 
 ## Bug description
 A clear and concise description of what the bug is.
@@ -26,10 +34,10 @@ A clear and concise description of what you expected to happen.
 ## Server Info
 **(please complete the following information):**
  - OS: [e.g. Debian 10, Ubuntu 20.04]
- - Image Source: [e.g. "Vanilla download" or "Installscript from my provider (specify which)"]
+ - Image Source: [e.g. "Vanilla download" or "Install script from my provider (specify which)"]
 
 ## Is Swizzin up to date?
-- Please run `box update`, and report whether that was succesful. Please try to reproduce your issue again.
+- Please run `box update`, and report whether that was successful. Please try to reproduce your issue again.
 
 - Please mention the commit hash you are seeing
   - [e.g. `HEAD is now at `**`d4d151b`** `...`]
@@ -46,9 +54,7 @@ Good sources for log output could be the following: (only if they have relevant 
 
 **Please paste your code into code blocks using the codeblock format like so**
 
- \`\`\` 
- 
+ ``` 
  ... logs ... 
- 
- \`\`\`
+ ```
 

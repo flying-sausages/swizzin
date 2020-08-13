@@ -101,7 +101,7 @@ _addusers_mango () {
             if [[ $passlen -ge 6 ]]; then 
                 su $mangousr -c "$mangodir/mango admin user add -u $u -p $pass"
             else
-                pass=$(openssl rand -base64 32)
+                pass=$(openssl rand -base64 16)
                 echo "WARNING: $u's password too short for mango, please change the password using 'box chpasswd $u'" | tee -a $log
                 echo "Mango account temporarily set up with the password '$pass'"
                 su $mangousr -c "$mangodir/mango admin user add -u $u -p $pass"
@@ -131,6 +131,6 @@ if [[ -f /install/.nginx.lock ]]; then
 fi
 
 echo "Please use your existing credentials when logging in."
-echo "You can access your files in $mangodir/library" | tee -a /root/mango.info
+echo "You can access your files in $mangodir/library" | tee -a $log
 
 touch /install/.mango.lock

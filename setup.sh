@@ -29,66 +29,66 @@ if [[ ! $(uname -m) == "x86_64" ]]; then
   read -rep 'By pressing enter to continue, you agree to the above statement. Press control-c to quit.'
 fi
 
-  # installlist=()
-  while test $# -gt 0
-    do
-        case "$1" in
-            --user) shift
-                user="$1"
-                echo "User = $user"
-                unattend=true
-                ;;
-            --pass) shift
-                pass="$1"
-                echo "Pass = $pass"
-                unattend=true
-                ;;
-            --dev) 
-                dev=true
-                echo "Dev = $dev"
-                ;;
-            --env) shift
-                if [[ -f $1 ]]; then
-                  echo "Parsing env variables from $1"
-                  echo -n "---> "
-                  export $(grep -v '^#' $1 | xargs -t -d '\n')
-                  if [[ -n $packagelist ]]; then
-                    readarray -td: installlist < <(printf '%s' "$packagelist")
-                  fi
-                  unattend=true
-                else
-                  echo "File does not exist"
-                  exit 1
+RelativeScriptPath=$(dirname "${BASH_SOURCE[0]}")
+while test $# -gt 0
+  do
+      case "$1" in
+          --user) shift
+              user="$1"
+              echo "User = $user"
+              unattend=true
+              ;;
+          --pass) shift
+              pass="$1"
+              echo "Pass = $pass"
+              unattend=true
+              ;;
+          --dev) 
+              dev=true
+              echo "Dev = $dev"
+              ;;
+          --env) shift
+              if [[ -f $1 ]]; then
+                echo "Parsing env variables from $1"
+                echo -n "---> "
+                export $(grep -v '^#' $1 | xargs -t -d '\n')
+                if [[ -n $packagelist ]]; then
+                  readarray -td: installlist < <(printf '%s' "$packagelist")
                 fi
-                ;;
-            --unattend) 
                 unattend=true
-            ;;
-            -*) echo "Error: Invalid option: $1"
+              else
+                echo "File does not exist"
                 exit 1
-                ;;
-            *) installlist+=("$1")
-                ;;
-        esac
-        shift
-    done
-  #check Line 229 or something
-  if [[ ${#installlist[@]} -gt 0 ]]; then 
-    priority=(nginx rtorrent deluge qbittorrent autodl panel vsftpd ffmpeg quota)
-    touch /root/results
-    touch /root/results2
-    for i in "${installlist[@]}"
-    do
-      #TODO check why this does not work, everything ends up in results2
-      if [[ " ${priority[@]} " =~ " ${i} " ]]; then
-        echo "$i" >> /root/results
-        echo "$i" added to install queue 1
-      else
-        echo "$i" >> /root/results2
-        echo "$i" added to install queue 2
-      fi
-    done
-  fi
+              fi
+              ;;
+          --unattend) 
+              unattend=true
+          ;;
+          -*) echo "Error: Invalid option: $1"
+              exit 1
+              ;;
+          *) installlist+=("$1")
+              ;;
+      esac
+      shift
+  done
+#check Line 229 or something
+if [[ ${#installlist[@]} -gt 0 ]]; then 
+  priority=(nginx rtorrent deluge qbittorrent autodl panel vsftpd ffmpeg quota)
+  touch /root/results
+  touch /root/results2
+  for i in "${installlist[@]}"
+  do
+    #TODO check why this does not work, everything ends up in results2
+    if [[ " ${priority[@]} " =~ " ${i} " ]]; then
+      echo "$i" >> /root/results
+      echo "$i" added to install queue 1
+    else
+      echo "$i" >> /root/results2
+      echo "$i" added to install queue 2
+    fi
+  done
+fi
 
 _os() {
   if [ ! -d /install ]; then mkdir /install ; fi
@@ -139,10 +139,14 @@ function _preparation() {
     echo
     echo "WELCOME TO THE WORLD OF THE SWIZ YOUNG PADAWAN"
     echo "Instead of cloning from upstream, the directory where the setup script is located is getting symlinked to /etc/swizzin"
-    RelativeScriptPath=$(dirname "$0")
     echo "That directory is relative to your pwd  = $RelativeScriptPath"
     ln -sr "$RelativeScriptPath" /etc/swizzin
     echo "Best of luck and please follow the contribution guidelines cheerio"
+    if [[ ! -e /etc/swizzin ]]; then
+      echo "so something fucked up, please join discord and tell us what you did coz that shouldn't have happened"
+      exit 1
+    fi
+    sleep 3
     echo
   fi
   ln -s /etc/swizzin/scripts/ /usr/local/bin/swizzin

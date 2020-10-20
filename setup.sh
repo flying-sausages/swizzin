@@ -141,22 +141,17 @@ function _preparation() {
   apt-get -y install whiptail git sudo curl wget lsof fail2ban apache2-utils vnstat tcl tcl-dev build-essential dirmngr apt-transport-https bc uuid-runtime jq net-tools >> ${log} 2>&1
   nofile=$(grep "DefaultLimitNOFILE=500000" /etc/systemd/system.conf)
   if [[ ! "$nofile" ]]; then echo "DefaultLimitNOFILE=500000" >> /etc/systemd/system.conf; fi
-  echo "Cloning swizzin repo to localhost"
   if [[ $local != "true" ]]; then 
+    echo "Cloning swizzin repo to localhost"
     git clone https://github.com/liaralabs/swizzin.git /etc/swizzin >> ${log} 2>&1
   else
-    echo
-    echo "WELCOME TO THE WORLD OF THE SWIZ YOUNG PADAWAN"
-    echo "Instead of cloning from upstream, the directory where the setup script is located is getting symlinked to /etc/swizzin"
-    echo "That directory is relative to your pwd  = $RelativeScriptPath"
+    echo "Symlinking $RelativeScriptPath to /etc/swizzin"
     ln -sr "$RelativeScriptPath" /etc/swizzin
-    echo "Best of luck and please follow the contribution guidelines cheerio"
+    echo "We appreciate any and all PRs. please read the Contributing.md as it has a lot of useful tips when working with swizzin."
     if [[ ! -e /etc/swizzin ]]; then
       echo "so something fucked up, please join discord and tell us what you did coz that shouldn't have happened"
       exit 1
     fi
-    sleep 3
-    echo
   fi
   ln -s /etc/swizzin/scripts/ /usr/local/bin/swizzin
   chmod -R 700 /etc/swizzin/scripts

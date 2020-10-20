@@ -33,7 +33,7 @@ else
   remove_rtorrent
 fi
 echo "Checking rTorrent Dependencies ... ";depends_rtorrent
-if [[ ! $rtorrentver == repo ]]; then
+if [[ ! $RTORRENT_v == repo ]]; then
   echo "Building xmlrpc-c from source ... ";build_xmlrpc-c
   echo "Building libtorrent from source ... ";build_libtorrent_rakshasa
   echo "Building rtorrent from source ... ";build_rtorrent

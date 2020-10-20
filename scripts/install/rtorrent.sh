@@ -75,7 +75,7 @@ EOF
 systemctl enable --now rtorrent@${user} 2>> $log
 }
 
-export DEBIAN_FRONTEND=noninteractive
+# export DEBIAN_FRONTEND=noninteractive
 
 if [[ -f /tmp/.install.lock ]]; then
   export log="/root/logs/install.log"

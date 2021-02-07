@@ -48,7 +48,7 @@ jobs:
           hcloud-token: ${{ secrets.HCLOUD_TOKEN }}
       - uses: webfactory/ssh-agent@v0.4.1
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-private-key: ${{ secrets.HETZNER_SSH_KEY }}
       - run: mkdir -p ~/.ssh/ && ssh-keyscan -H $SERVER_IPV4 >> ~/.ssh/known_hosts
       - run: ssh root@$SERVER_IPV4 touch tim_was_here
       - run: ssh root@$SERVER_IPV4 ls          

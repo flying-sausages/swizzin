@@ -54,8 +54,8 @@ jobs:
       - run: mkdir -p ~/.ssh/ && ssh-keyscan -H $SERVER_IPV4 >> ~/.ssh/known_hosts
       - run: ls; echo $GITHUB_WORKSPACE
       - run: base="$(basename $PWD)" ; cd .. ; tar -czf "$base.tar.gz" "$base" && ssh root@$SERVER_IPV4 "cat > /tmp/$base.tar.gz" < "$base.tar.gz" && ssh root@$SERVER_IPV4 tar --strip-components=1 -zxf "/tmp/*.tar.gz"
-      - run: ssh root@$SERVER_IPV4 ls /tmp ; ls
-      - run: ssh root@$SERVER_IPV4 bash swizzin/setup.sh --local --env .hetzner.ci.env
+      - run: ssh root@$SERVER_IPV4 ls /tmp ; echo; ls -lah
+      - run: ssh root@$SERVER_IPV4 bash ./setup.sh --local --env .hetzner.ci.env
       - run: ssh root@$SERVER_IPV4 cat /root/logs/install.log
       - run: ssh root@$SERVER_IPV4 cat /root/logs/swizzin.log
         

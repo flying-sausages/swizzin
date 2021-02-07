@@ -45,7 +45,7 @@ jobs:
           server-name: "gh-actions-server"
           server-image: "ubuntu-20.04"
           server-type: "cx11"
-          ssh-key-name: "my key name"
+          ssh-key-name: "github"
           hcloud-token: ${{ secrets.HCLOUD_TOKEN }}
       - uses: webfactory/ssh-agent@v0.4.1
         with:

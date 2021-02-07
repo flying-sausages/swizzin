@@ -24,6 +24,34 @@ fi
 export log=/root/logs/swizzin.log
 mkdir -p /root/logs
 touch $log
+_parse_env_early() {
+    if [[ "$*" =~ '--env' ]]; then
+        argcopy=("$@")
+        env_file_path_index=$("${argcopy[@]/--env/%}" | cut -d% -f1 | wc -w | tr -d ' ')
+        ((env_file_path_index++))
+        env_file_path=${argcopy[$env_file_path_index]}
+        # echo "PATH = $env_file_path"
+        if [[ ! -f $env_file_path ]]; then
+            echo "Specified env file \"$env_file_path\" does not exist"
+            exit 1
+        fi
+        echo -e "\tParsing env variables from $env_file_path..."
+        grep -v '^#' "$env_file_path" | grep '^[A-Z]'
+        grep -v '^#' "$env_file_path" | grep '^[a-z]'
+        #shellcheck disable=SC2046
+        export $(grep -v '^#' "$env_file_path" | grep '^[A-Z]' | tr '\n' ' ') # anything which begins with a cap is exported
+        #shellcheck disable=SC2091
+        source <(grep -v '^#' "$env_file_path" | grep '^[a-z]') # | read -d $'\x04' name -
+        if [[ -n $packages ]]; then
+            readarray -td: installArray < <(printf '%s' "$packages")
+        fi
+        unattend=true
+        export SKIPCRACKLIB=true
+        echo
+        echo
+    fi
+}
+_parse_env_early "$@"
 
 # Setting up /etc/swizzin
 #shellcheck disable=SC2120
@@ -33,7 +61,7 @@ function _source_setup() {
     apt-get install git -y -q >> $log || exit 1   # DO NOT PUT MORE DEPENDENCIES HERE
     echo -e "\tGit Installed" | tee -a "$log"     # All dependencies go to scripts/update/10-dependencies.sh
 
-    if [[ "$*" =~ '--local' ]]; then
+    if [[ "$*" =~ '--local' || $LOCAL == "true" ]]; then # Have to check for both otherwise this will not run properly
         RelativeScriptPath=$(dirname "${BASH_SOURCE[0]}")
         if [[ ! -e /etc/swizzin ]]; then # If there is no valid file or dir there...
             ln -sr "$RelativeScriptPath" /etc/swizzin
@@ -100,7 +128,7 @@ function _option_parse() {
                 echo_info "Domain = $LE_HOSTNAME, Used in default nginx config = $LE_DEFAULTCONF"
                 ;;
             --local)
-                LOCAL=true
+                LOCAL=true # Already had to be parsed before so no reason to use this again really
                 echo_info "Local = $LOCAL"
                 ;;
             --run-checks)
@@ -113,20 +141,7 @@ function _option_parse() {
                 ;;
             --env)
                 shift
-                if [[ ! -f $1 ]]; then
-                    echo_error "Specified env file \"$1\" does not exist"
-                    exit 1
-                fi
-                echo_info "Parsing env variables from $1\n--->"
-                #shellcheck disable=SC2046
-                export $(grep -v '^#' "$1" | grep '^[A-Z]' | tr '\n' ' ') # anything which begins with a cap is exported
-                #shellcheck disable=SC2091
-                source <(grep -v '^#' "$1" | grep '^[a-z]') # | read -d $'\x04' name -
-                if [[ -n $packages ]]; then
-                    readarray -td: installArray < <(printf '%s' "$packages")
-                fi
-                unattend=true
-                export SKIPCRACKLIB=true
+                : #parsed earlier but needs to be a validated choice
                 ;;
             --unattend)
                 unattend=true
@@ -336,10 +351,22 @@ function _check_results() {
 }
 
 function _prioritize_results() {
-    if grep -q nginx "$results"; then
+
+    if grep -q nginx "/root/results2"; then
+        sed -i '/nginx/d' /root/results2
+        sed -i '1s/^/nginx\n/' /root/results
+    fi
+
+    if grep -q nginx "/root/results"; then
         sed -i '/nginx/d' /root/results
         sed -i '1s/^/nginx\n/' /root/results
     fi
+    echo "Results1 = "
+    cat /root/results >> $log
+
+    echo "Results2 = "
+    cat /root/results2 >> $log
+
 }
 
 function _install() {

@@ -28,25 +28,25 @@ touch $log
 # Setting up /etc/swizzin
 #shellcheck disable=SC2120
 function _source_setup() {
-    echo -e "...\tInstalling git"      # The one true dependency
-    apt-get update -q >> $log 2>&1     # Force update just in case sources were never pulled
-    apt-get install git -y -qq >> $log # DO NOT PUT MORE DEPENDENCIES HERE
-    echo -e "\tGit Installed"          # All dependencies go to scripts/update/10-dependencies.sh
+    echo -e "...\tInstalling git" | tee -a "$log" # The one true dependency
+    apt-get update -q >> $log 2>&1 || exit 1      # Force update just in case sources were never pulled
+    apt-get install git -y -q >> $log || exit 1   # DO NOT PUT MORE DEPENDENCIES HERE
+    echo -e "\tGit Installed" | tee -a "$log"     # All dependencies go to scripts/update/10-dependencies.sh
 
     if [[ "$*" =~ '--local' ]]; then
         RelativeScriptPath=$(dirname "${BASH_SOURCE[0]}")
         if [[ ! -e /etc/swizzin ]]; then # If there is no valid file or dir there...
             ln -sr "$RelativeScriptPath" /etc/swizzin
-            echo "The directory where the setup script is located is symlinked to /etc/swizzin"
+            echo "The directory where the setup script is located is symlinked to /etc/swizzin" | tee -a "$log"
         else
             touch /etc/swizzin/.dev.lock
-            echo "/etc/swizzin/.dev.lock created"
+            echo "/etc/swizzin/.dev.lock created" | tee -a "$log"
         fi
-        echo "Best of luck and please follow the contribution guidelines cheerio"
+        echo "Best of luck and please follow the contribution guidelines cheerio" | tee -a "$log"
     else
-        echo -e "...\tCloning swizzin repo to localhost"
+        echo -e "...\tCloning swizzin repo to localhost" | tee -a "$log"
         git clone https://github.com/swizzin/swizzin.git /etc/swizzin >> ${log} 2>&1
-        echo -e "\tSwizzin cloned!"
+        echo -e "\tSwizzin cloned!" | tee -a "$log"
     fi
 
     ln -s /etc/swizzin/scripts/ /usr/local/bin/swizzin
@@ -114,7 +114,7 @@ function _option_parse() {
             --env)
                 shift
                 if [[ ! -f $1 ]]; then
-                    echo_error "File does not exist"
+                    echo_error "Specified env file \"$1\" does not exist"
                     exit 1
                 fi
                 echo_info "Parsing env variables from $1\n--->"
@@ -396,10 +396,10 @@ function _post() {
 
 _run_checks() {
     if [[ $RUN_CHECKS = "true" ]]; then
-        echo
+        echo | tee -a "$log"
         echo_info "Running post-install checks"
         echo_progress_start "Checking all failed units"
-        systemctl list-units --failed
+        systemctl list-units --failed | tee -a "$log"
         echo_progress_done "listed"
     fi
 }

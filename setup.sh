@@ -354,12 +354,15 @@ function _prioritize_results() {
 
     if grep -q nginx "/root/results2"; then
         sed -i '/nginx/d' /root/results2
-        sed -i '1s/^/nginx\n/' /root/results
+        echo "" >> /root/results
+        sed -i '1 i\nginx' /root/results
     fi
 
     if grep -q nginx "/root/results"; then
         sed -i '/nginx/d' /root/results
-        sed -i '1s/^/nginx\n/' /root/results
+        echo "" >> /root/results
+        sed -i '1 i\nginx' /root/results
+
     fi
     echo "Results1 = "
     cat /root/results >> $log

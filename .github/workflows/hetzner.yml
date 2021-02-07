@@ -35,6 +35,7 @@ on:
 #           echo Add other actions to build,
 #           echo test, and deploy your project.
           
+          # No empty commits from web UI smh
 jobs:
   build:
     runs-on: Ubuntu-20.04

@@ -52,9 +52,8 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - run: mkdir -p ~/.ssh/ && ssh-keyscan -H $SERVER_IPV4 >> ~/.ssh/known_hosts
-      - run: base=$(basename $PWD) ; cd .. ; tar -czf $base.tar.gz $base && ssh root@$SERVER_IPV4 "cat > /tmp/$base.tar.gz" < $base.tar.gz
+      - run: base="$(basename $PWD)" ; cd .. ; tar -czf "$base.tar.gz" "$base" && ssh root@$SERVER_IPV4 "cat > /tmp/$base.tar.gz" < "$base.tar.gz"
       - run: ssh root@$SERVER_IPV4 tar --strip-components=1 -zxf "/tmp/$base.tar.gz"
-      - run: ssh root@$SERVER_IPV4 "cat > /tmp/swiz-env" < .hetzner.ci.env
       - run: ssh root@$SERVER_IPV4 ls
       - run: ssh root@$SERVER_IPV4 bash swizzin/setup.sh --local --env .hetzner.ci.env
       - run: ssh root@$SERVER_IPV4 cat /root/logs/install.log

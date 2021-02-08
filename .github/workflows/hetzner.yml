@@ -29,7 +29,7 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - name: "SSH setup & repo copy"
-        run: mkdir -p ~/.ssh/ && ssh-keyscan -H $SERVER_IPV4 >> ~/.ssh/known_hosts ; |
+        run: mkdir -p ~/.ssh/ && ssh-keyscan -H $SERVER_IPV4 >> ~/.ssh/known_hosts ;
           ls;
           echo $GITHUB_WORKSPACE;
           echo "base=$(basename $PWD)" >> $GITHUB_ENV;

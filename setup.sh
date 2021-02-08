@@ -24,29 +24,64 @@ fi
 export log=/root/logs/swizzin.log
 mkdir -p /root/logs
 touch $log
+_parse_env_early() {
+    if [[ "$*" =~ '--env' ]]; then
+        arg_current=""
+        arg_previous=""
+        for arg; do
+            arg_current="$arg"
+            if [[ $arg_previous = "--env" ]]; then
+                # if the argument before the current one was --env,
+                # then the current argument must therefore be the path
+                env_file_path="$arg_current"
+                break
+            fi
+            arg_previous="$arg_current"
+        done
+
+        if [[ ! -f $env_file_path ]]; then
+            echo "Specified env file \"$env_file_path\" does not exist"
+            exit 1
+        fi
+        echo -e "\tParsing env variables from $env_file_path..."
+        grep -v '^#' "$env_file_path" | grep '^[A-Z]'
+        grep -v '^#' "$env_file_path" | grep '^[a-z]'
+        #shellcheck disable=SC2046
+        export $(grep -v '^#' "$env_file_path" | grep '^[A-Z]' | tr '\n' ' ') # anything which begins with a cap is exported
+        #shellcheck disable=SC2091
+        source <(grep -v '^#' "$env_file_path" | grep '^[a-z]') # | read -d $'\x04' name -
+        if [[ -n $packages ]]; then
+            readarray -td: installArray < <(printf '%s' "$packages")
+        fi
+        unattend=true
+        export SKIPCRACKLIB=true
+        echo "-------------"
+    fi
+}
+_parse_env_early "$@"
 
 # Setting up /etc/swizzin
 #shellcheck disable=SC2120
 function _source_setup() {
-    echo -e "...\tInstalling git"      # The one true dependency
-    apt-get update -q >> $log 2>&1     # Force update just in case sources were never pulled
-    apt-get install git -y -qq >> $log # DO NOT PUT MORE DEPENDENCIES HERE
-    echo -e "\tGit Installed"          # All dependencies go to scripts/update/10-dependencies.sh
+    echo -e "...\tInstalling git" | tee -a "$log"                              # The one true dependency
+    DEBIAN_FRONTEND=noninteractive apt-get update -q >> $log 2>&1 || exit 1    # Force update just in case sources were never pulled
+    DEBIAN_FRONTEND=noninteractive apt-get install git -y -q >> $log || exit 1 # DO NOT PUT MORE DEPENDENCIES HERE
+    echo -e "\tGit Installed" | tee -a "$log"                                  # All dependencies go to scripts/update/10-dependencies.sh
 
-    if [[ "$*" =~ '--local' ]]; then
+    if [[ "$*" =~ '--local' || $LOCAL == "true" ]]; then # Have to check for both otherwise this will not run properly
         RelativeScriptPath=$(dirname "${BASH_SOURCE[0]}")
         if [[ ! -e /etc/swizzin ]]; then # If there is no valid file or dir there...
             ln -sr "$RelativeScriptPath" /etc/swizzin
-            echo "The directory where the setup script is located is symlinked to /etc/swizzin"
+            echo "The directory where the setup script is located is symlinked to /etc/swizzin" | tee -a "$log"
         else
             touch /etc/swizzin/.dev.lock
-            echo "/etc/swizzin/.dev.lock created"
+            echo "/etc/swizzin/.dev.lock created" | tee -a "$log"
         fi
-        echo "Best of luck and please follow the contribution guidelines cheerio"
+        echo "Best of luck and please follow the contribution guidelines cheerio" | tee -a "$log"
     else
-        echo -e "...\tCloning swizzin repo to localhost"
+        echo -e "...\tCloning swizzin repo to localhost" | tee -a "$log"
         git clone https://github.com/swizzin/swizzin.git /etc/swizzin >> ${log} 2>&1
-        echo -e "\tSwizzin cloned!"
+        echo -e "\tSwizzin cloned!" | tee -a "$log"
     fi
 
     ln -s /etc/swizzin/scripts/ /usr/local/bin/swizzin
@@ -100,7 +135,7 @@ function _option_parse() {
                 echo_info "Domain = $LE_HOSTNAME, Used in default nginx config = $LE_DEFAULTCONF"
                 ;;
             --local)
-                LOCAL=true
+                LOCAL=true # Already had to be parsed before so no reason to use this again really
                 echo_info "Local = $LOCAL"
                 ;;
             --run-checks)
@@ -113,20 +148,7 @@ function _option_parse() {
                 ;;
             --env)
                 shift
-                if [[ ! -f $1 ]]; then
-                    echo_error "File does not exist"
-                    exit 1
-                fi
-                echo_info "Parsing env variables from $1\n--->"
-                #shellcheck disable=SC2046
-                export $(grep -v '^#' "$1" | grep '^[A-Z]' | tr '\n' ' ') # anything which begins with a cap is exported
-                #shellcheck disable=SC2091
-                source <(grep -v '^#' "$1" | grep '^[a-z]') # | read -d $'\x04' name -
-                if [[ -n $packages ]]; then
-                    readarray -td: installArray < <(printf '%s' "$packages")
-                fi
-                unattend=true
-                export SKIPCRACKLIB=true
+                : #parsed earlier but needs to be a validated choice
                 ;;
             --unattend)
                 unattend=true
@@ -336,11 +358,25 @@ function _check_results() {
 }
 
 function _prioritize_results() {
-    if grep -q nginx "$results"; then
+
+    if grep -q nginx "/root/results2"; then
+        sed -i '/nginx/d' /root/results2
+        echo "" >> /root/results
+        sed -i '1 i\nginx' /root/results
+    fi
+
+    if grep -q nginx "/root/results"; then
         sed -i '/nginx/d' /root/results
         echo "" >> /root/results
-        sed -i '1s/^/nginx\n/' /root/results
+        sed -i '1 i\nginx' /root/results
     fi
+
+    echo_log_only "Results1 = "
+    cat /root/results >> $log
+
+    echo_log_only "Results2 = "
+    cat /root/results2 >> $log
+
 }
 
 function _install() {
@@ -397,10 +433,10 @@ function _post() {
 
 _run_checks() {
     if [[ $RUN_CHECKS = "true" ]]; then
-        echo
+        echo | tee -a "$log"
         echo_info "Running post-install checks"
         echo_progress_start "Checking all failed units"
-        systemctl list-units --failed
+        systemctl list-units --failed | tee -a "$log"
         echo_progress_done "listed"
     fi
 }

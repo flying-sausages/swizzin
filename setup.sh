@@ -371,10 +371,10 @@ function _prioritize_results() {
         sed -i '1 i\nginx' /root/results
     fi
 
-    echo "Results1 = "
+    echo_log_only "Results1 = "
     cat /root/results >> $log
 
-    echo "Results2 = "
+    echo_log_only "Results2 = "
     cat /root/results2 >> $log
 
 }

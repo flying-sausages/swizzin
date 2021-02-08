@@ -26,11 +26,19 @@ mkdir -p /root/logs
 touch $log
 _parse_env_early() {
     if [[ "$*" =~ '--env' ]]; then
-        argcopy=("$@")
-        env_file_path_index=$("${argcopy[@]/--env/%}" | cut -d% -f1 | wc -w | tr -d ' ')
-        ((env_file_path_index++))
-        env_file_path=${argcopy[$env_file_path_index]}
-        # echo "PATH = $env_file_path"
+        arg_current=""
+        arg_previous=""
+        for arg; do
+            arg_current="$arg"
+            if [[ $arg_previous = "--env" ]]; then
+                # if the argument before the current one was --env,
+                # then the current argument must therefore be the path
+                env_file_path="$arg_current"
+                break
+            fi
+            arg_previous="$arg_current"
+        done
+
         if [[ ! -f $env_file_path ]]; then
             echo "Specified env file \"$env_file_path\" does not exist"
             exit 1
@@ -47,8 +55,7 @@ _parse_env_early() {
         fi
         unattend=true
         export SKIPCRACKLIB=true
-        echo
-        echo
+        echo "-------------"
     fi
 }
 _parse_env_early "$@"

@@ -63,10 +63,10 @@ _parse_env_early "$@"
 # Setting up /etc/swizzin
 #shellcheck disable=SC2120
 function _source_setup() {
-    echo -e "...\tInstalling git" | tee -a "$log"                             # The one true dependency
-    DEBIAN_FRONTEND=noninteractive apt-get update -q >>$log 2>&1 || exit 1    # Force update just in case sources were never pulled
-    DEBIAN_FRONTEND=noninteractive apt-get install git -y -q >>$log || exit 1 # DO NOT PUT MORE DEPENDENCIES HERE
-    echo -e "\tGit Installed" | tee -a "$log"                                 # All dependencies go to scripts/update/10-dependencies.sh
+    echo -e "...\tInstalling git" | tee -a "$log"                              # The one true dependency
+    DEBIAN_FRONTEND=noninteractive apt-get update -q >> $log 2>&1 || exit 1    # Force update just in case sources were never pulled
+    DEBIAN_FRONTEND=noninteractive apt-get install git -y -q >> $log || exit 1 # DO NOT PUT MORE DEPENDENCIES HERE
+    echo -e "\tGit Installed" | tee -a "$log"                                  # All dependencies go to scripts/update/10-dependencies.sh
 
     if [[ "$*" =~ '--local' || $LOCAL == "true" ]]; then # Have to check for both otherwise this will not run properly
         RelativeScriptPath=$(dirname "${BASH_SOURCE[0]}")
@@ -80,7 +80,7 @@ function _source_setup() {
         echo "Best of luck and please follow the contribution guidelines cheerio" | tee -a "$log"
     else
         echo -e "...\tCloning swizzin repo to localhost" | tee -a "$log"
-        git clone https://github.com/swizzin/swizzin.git /etc/swizzin >>${log} 2>&1
+        git clone https://github.com/swizzin/swizzin.git /etc/swizzin >> ${log} 2>&1
         echo -e "\tSwizzin cloned!" | tee -a "$log"
     fi
 
@@ -109,62 +109,62 @@ _arch_check
 function _option_parse() {
     while test $# -gt 0; do
         case "$1" in
-        --user)
-            shift
-            user="$1"
-            echo_info "User = $user"
-            ;;
-        --pass | --password)
-            shift
-            pass="$1"
-            echo -e "\tPass = $pass" #Not an echo_info as we don't want this to hit the logs
-            ;;
-        --skip-cracklib)
-            if check_installed libpam-cracklib; then
-                echo_warn "Can't skip password check as libpam-cracklib is installed"
-            else
-                export SKIPCRACKLIB=true
-                echo_info "Cracklib will be skipped"
-            fi
-            ;;
-        --domain)
-            shift
-            export LE_HOSTNAME="$1"
-            export LE_DEFAULTCONF=yes
-            export LE_BOOL_CF=no
-            echo_info "Domain = $LE_HOSTNAME, Used in default nginx config = $LE_DEFAULTCONF"
-            ;;
-        --local)
-            LOCAL=true # Already had to be parsed before so no reason to use this again really
-            echo_info "Local = $LOCAL"
-            ;;
-        --run-checks)
-            export RUN_CHECKS=true
-            echo_info "RUN_CHECKS = $RUN_CHECKS"
-            ;;
-        --rmgrsec)
-            rmgrsec=yes
-            echo_info "OVH Kernel nuke = $rmgrsec"
-            ;;
-        --env)
-            shift
-            : #parsed earlier but needs to be a validated choice
-            ;;
-        --unattend)
-            unattend=true
-            ;;
-        --post-command)
-            shift
-            postcommand="$1"
-            echo_info "Post-install command = \"$postcommand\""
-            ;;
-        -*)
-            echo_error "Error: Invalid option: $1"
-            exit 1
-            ;;
-        *)
-            installArray+=("$1")
-            ;;
+            --user)
+                shift
+                user="$1"
+                echo_info "User = $user"
+                ;;
+            --pass | --password)
+                shift
+                pass="$1"
+                echo -e "\tPass = $pass" #Not an echo_info as we don't want this to hit the logs
+                ;;
+            --skip-cracklib)
+                if check_installed libpam-cracklib; then
+                    echo_warn "Can't skip password check as libpam-cracklib is installed"
+                else
+                    export SKIPCRACKLIB=true
+                    echo_info "Cracklib will be skipped"
+                fi
+                ;;
+            --domain)
+                shift
+                export LE_HOSTNAME="$1"
+                export LE_DEFAULTCONF=yes
+                export LE_BOOL_CF=no
+                echo_info "Domain = $LE_HOSTNAME, Used in default nginx config = $LE_DEFAULTCONF"
+                ;;
+            --local)
+                LOCAL=true # Already had to be parsed before so no reason to use this again really
+                echo_info "Local = $LOCAL"
+                ;;
+            --run-checks)
+                export RUN_CHECKS=true
+                echo_info "RUN_CHECKS = $RUN_CHECKS"
+                ;;
+            --rmgrsec)
+                rmgrsec=yes
+                echo_info "OVH Kernel nuke = $rmgrsec"
+                ;;
+            --env)
+                shift
+                : #parsed earlier but needs to be a validated choice
+                ;;
+            --unattend)
+                unattend=true
+                ;;
+            --post-command)
+                shift
+                postcommand="$1"
+                echo_info "Post-install command = \"$postcommand\""
+                ;;
+            -*)
+                echo_error "Error: Invalid option: $1"
+                exit 1
+                ;;
+            *)
+                installArray+=("$1")
+                ;;
         esac
         shift
     done
@@ -187,11 +187,11 @@ function _option_parse() {
         for i in "${installArray[@]}"; do
             #shellcheck disable=SC2199,SC2076
             if [[ " ${priority[@]} " =~ " ${i} " ]]; then
-                echo "$i" >>/root/results
+                echo "$i" >> /root/results
                 echo_log_only "$i added to install queue 1"
                 touch /tmp/."$i".lock
             else
-                echo "$i" >>/root/results2
+                echo "$i" >> /root/results2
                 echo_log_only "$i added to install queue 2"
             fi
         done
@@ -202,9 +202,9 @@ _option_parse "$@"
 _os() {
     if [ ! -d /install ]; then mkdir /install; fi
     if [ ! -d /root/logs ]; then mkdir /root/logs; fi
-    if ! which lsb_release >/dev/null; then
-        echo -e "...\tInstalling lsb-release"     # Okay MAYBE there's one more depend until we gut this app in favour of /etc/os-release
-        apt-get install lsb-release -y -qq >>$log # DO NOT PUT MORE DEPENDENCIES HERE
+    if ! which lsb_release > /dev/null; then
+        echo -e "...\tInstalling lsb-release"      # Okay MAYBE there's one more depend until we gut this app in favour of /etc/os-release
+        apt-get install lsb-release -y -qq >> $log # DO NOT PUT MORE DEPENDENCIES HERE
     fi
     distribution=$(lsb_release -is)
     codename=$(lsb_release -cs)
@@ -220,17 +220,17 @@ _os() {
 
 function _preparation() {
     echo_info "Preparing system"
-    apt-get install uuid-runtime -yy >>$log 2>&1
+    apt-get install uuid-runtime -yy >> $log 2>&1
     apt_update # Do this because sometimes the system install is so fresh it's got a good stam but it is "empty"
 
     if [[ $distribution = "Ubuntu" ]]; then
         echo_progress_start "Enabling required repos"
-        if ! which add-apt-repository >/dev/null; then
+        if ! which add-apt-repository > /dev/null; then
             apt_install software-properties-common
         fi
-        add-apt-repository universe >>${log} 2>&1
-        add-apt-repository multiverse >>${log} 2>&1
-        add-apt-repository restricted -u >>${log} 2>&1
+        add-apt-repository universe >> ${log} 2>&1
+        add-apt-repository multiverse >> ${log} 2>&1
+        add-apt-repository restricted -u >> ${log} 2>&1
         echo_progress_done
     fi
 
@@ -242,7 +242,7 @@ function _preparation() {
     fi
 
     nofile=$(grep "DefaultLimitNOFILE=500000" /etc/systemd/system.conf)
-    if [[ ! "$nofile" ]]; then echo "DefaultLimitNOFILE=500000" >>/etc/systemd/system.conf; fi
+    if [[ ! "$nofile" ]]; then echo "DefaultLimitNOFILE=500000" >> /etc/systemd/system.conf; fi
     echo_progress_done "Setup succesful"
     echo
 }
@@ -280,7 +280,7 @@ function _choices() {
             packages+=("$i" '""')
         fi
     done
-    whiptail --title "Install Software" --checklist --noitem --separate-output "Choose your clients and core features." 15 26 7 "${packages[@]}" 2>/root/results || exit 1
+    whiptail --title "Install Software" --checklist --noitem --separate-output "Choose your clients and core features." 15 26 7 "${packages[@]}" 2> /root/results || exit 1
     results=/root/results
     if grep -q rtorrent "$results"; then
         gui=(rutorrent flood)
@@ -290,8 +290,8 @@ function _choices() {
                 guis+=("$i" '""')
             fi
         done
-        whiptail --title "rTorrent GUI" --checklist --noitem --separate-output "Optional: Select a GUI for rtorrent" 15 26 7 "${guis[@]}" 2>/root/guis || exit 1
-        readarray guis </root/guis
+        whiptail --title "rTorrent GUI" --checklist --noitem --separate-output "Optional: Select a GUI for rtorrent" 15 26 7 "${guis[@]}" 2> /root/guis || exit 1
+        readarray guis < /root/guis
         for g in "${guis[@]}"; do
             g=$(echo $g)
             sed -i "/rtorrent/a $g" /root/results
@@ -300,7 +300,7 @@ function _choices() {
     fi
     while IFS= read -r result; do
         touch /tmp/.$result.lock
-    done <"$results"
+    done < "$results"
 
     locksextra=($(find /usr/local/bin/swizzin/install -type f -printf "%f\n" | cut -d "." -f 1 | sort -d))
     for i in "${locksextra[@]}"; do
@@ -309,7 +309,7 @@ function _choices() {
             extras+=("$i" '""')
         fi
     done
-    whiptail --title "Install Software" --checklist --noitem --separate-output "Make some more choices ^.^ Or don't. idgaf" 15 26 7 "${extras[@]}" 2>/root/results2 || exit 1
+    whiptail --title "Install Software" --checklist --noitem --separate-output "Make some more choices ^.^ Or don't. idgaf" 15 26 7 "${extras[@]}" 2> /root/results2 || exit 1
 }
 
 function _check_results() {
@@ -361,32 +361,32 @@ function _prioritize_results() {
 
     if grep -q nginx "/root/results2"; then
         sed -i '/nginx/d' /root/results2
-        echo "" >>/root/results
+        echo "" >> /root/results
         sed -i '1 i\nginx' /root/results
     fi
 
     if grep -q nginx "/root/results"; then
         sed -i '/nginx/d' /root/results
-        echo "" >>/root/results
+        echo "" >> /root/results
         sed -i '1 i\nginx' /root/results
     fi
 
     echo "Results1 = "
-    cat /root/results >>$log
+    cat /root/results >> $log
 
     echo "Results2 = "
-    cat /root/results2 >>$log
+    cat /root/results2 >> $log
 
 }
 
 function _install() {
     begin=$(date +"%s")
     if [[ -s /root/results ]]; then
-        bash /etc/swizzin/scripts/box install $(</root/results) && rm /root/results
+        bash /etc/swizzin/scripts/box install $(< /root/results) && rm /root/results
         showTimer=true
     fi
     if [[ -s /root/results2 ]]; then
-        bash /etc/swizzin/scripts/box install $(</root/results2) && rm /root/results2
+        bash /etc/swizzin/scripts/box install $(< /root/results2) && rm /root/results2
         showTimer=true
     fi
     termin=$(date +"%s")
@@ -402,13 +402,13 @@ function _post() {
 
     ip=$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')
     if ! grep -q -ow '^export PATH=$PATH:/usr/local/bin/swizzin$' ~/.bashrc; then
-        echo "export PATH=\$PATH:/usr/local/bin/swizzin" >>/root/.bashrc
+        echo "export PATH=\$PATH:/usr/local/bin/swizzin" >> /root/.bashrc
     fi
     #echo "export PATH=\$PATH:/usr/local/bin/swizzin" >> /home/$user/.bashrc
     #chown ${user}: /home/$user/.profile
-    echo "Defaults    secure_path = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin/swizzin" >/etc/sudoers.d/secure_path
+    echo "Defaults    secure_path = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin/swizzin" > /etc/sudoers.d/secure_path
     if [[ $distribution = "Ubuntu" ]]; then
-        echo 'Defaults  env_keep -="HOME"' >/etc/sudoers.d/env_keep
+        echo 'Defaults  env_keep -="HOME"' > /etc/sudoers.d/env_keep
     fi
 
     ring_the_bell

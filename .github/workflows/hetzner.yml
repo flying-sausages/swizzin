@@ -2,7 +2,7 @@
 
 name: Hetzner test
 
-# Controls when the action will run. 
+# Controls when the action will run.
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
@@ -37,4 +37,3 @@ jobs:
       - run: ssh root@$SERVER_IPV4 bash ./setup.sh --pass boopityscoop --env .hetzner.ci.env
       - run: ssh root@$SERVER_IPV4 ls -lah /install
       - run: ssh root@$SERVER_IPV4 cat /root/logs/swizzin.log
-        

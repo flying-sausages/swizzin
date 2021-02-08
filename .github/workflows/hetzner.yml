@@ -32,7 +32,7 @@ jobs:
         run: mkdir -p ~/.ssh/ && ssh-keyscan -H $SERVER_IPV4 >> ~/.ssh/known_hosts ;
           ls;
           echo $GITHUB_WORKSPACE;
-          echo "base=$(basename $PWD)" >> $GITHUB_ENV;
+          echo "base=$(basename "$PWD")" >> $GITHUB_ENV;
           cd ..;
           tar -czf "${{ env.base }}.tar.gz" "${{ env.base }}" ;
           ssh root@$SERVER_IPV4 "cat > /tmp/${{ env.base }}.tar.gz" < "${{ env.base }}.tar.gz";
@@ -44,7 +44,7 @@ jobs:
         run: ssh root@$SERVER_IPV4 bash ./setup.sh --local --env .hetzner.ci.env --pass boopteetyscoop
 
       - name: "Tests"
-        run: ssh root@$SERVER_IPV4 ll /install; |
+        run: ssh root@$SERVER_IPV4 ll /install;
           ssh root@$SERVER_IPV4 cat /root/logs/swizzin.log;
         # run: ssh root@$SERVER_IPV4 box sysinfo --tutti
         # run: testuser=$(grep user= .hetzner.ci.env | xargs) ; echo "testuser=$testuser" >> $GITHUB_ENV

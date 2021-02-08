@@ -362,8 +362,8 @@ function _prioritize_results() {
         sed -i '/nginx/d' /root/results
         echo "" >> /root/results
         sed -i '1 i\nginx' /root/results
-
     fi
+    
     echo "Results1 = "
     cat /root/results >> $log
 

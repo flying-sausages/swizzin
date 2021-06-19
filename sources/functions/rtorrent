@@ -7,24 +7,16 @@ export codename=$(lsb_release -cs)
 function whiptail_rtorrent() {
     if [[ -z $rtorrentver ]] && [[ -z $1 ]]; then
         repov=$(get_candidate_version rtorrent)
-        if [[ ! ${codename} == "xenial" ]]; then
-            function=$(whiptail --title "Install Software" --menu "Choose an rTorrent version:" --ok-button "Continue" --nocancel 12 50 5 \
-                Repo "(${repov})" \
-                0.9.8 "" \
-                0.9.7 "" \
-                0.9.6 "" \
-                feature-bind "" 3>&1 1>&2 2>&3)
 
-        else
-            function=$(whiptail --title "Install Software" --menu "Choose an rTorrent version:" --ok-button "Continue" --nocancel 12 50 5 \
-                Repo "(${repov})" \
-                0.9.8 "" \
-                0.9.7 "" \
-                0.9.6 "" \
-                0.9.4 "" \
-                0.9.3 "" \
-                feature-bind "" 3>&1 1>&2 2>&3)
-        fi
+        function=$(whiptail --title "Choose an rTorrent version" --menu "All versions other than repo will be locally compiled from source" --ok-button "Continue" 14 50 5 \
+            Repo "(${repov})" \
+            0.9.8 "" \
+            0.9.7 "" \
+            0.9.6 "" \
+            feature-bind "" 3>&1 1>&2 2>&3) || {
+            echo_error "rTorrent version choice aborted"
+            exit 1
+        }
 
         if [[ $function == 0.9.8 ]]; then
             export rtorrentver='0.9.8'
@@ -64,13 +56,6 @@ function depends_rtorrent() {
     else
         APT='screen zip unzip bc mediainfo curl'
         apt_install $APT
-    fi
-
-    # (un)rar
-    if [[ $distribution == "Debian" ]]; then
-        _rar
-    else
-        apt_install rar unrar
     fi
 
     # mktorrent from source
@@ -122,7 +107,8 @@ function build_libtorrent_rakshasa() {
         VERSION=$libtorrentver
         tar -xvf libtorrent-${libtorrentver}.tar.gz -C /tmp/libtorrent --strip-components=1 >> $log 2>&1
         cd libtorrent >> $log 2>&1
-        if [[ ${libtorrentver} =~ ("0.13.6"|"0.13.7") ]] && [[ ! ${codename} == "xenial" ]]; then
+
+        if [[ ${libtorrentver} =~ ("0.13.6"|"0.13.7") ]]; then
             patch -p1 < /etc/swizzin/sources/openssl.patch >> "$log" 2>&1
             if pkg-config --atleast-version=1.14 cppunit && [[ ${libtorrentver} == 0.13.6 ]]; then
                 patch -p1 < /etc/swizzin/sources/cppunit.patch >> "$log" 2>&1
@@ -176,15 +162,6 @@ function build_rtorrent() {
 
 function rtorrent_apt() {
     apt_install rtorrent
-}
-
-function _rar() {
-    cd /tmp
-    wget -q http://www.rarlab.com/rar/rarlinux-x64-5.5.0.tar.gz
-    tar -xzf rarlinux-x64-5.5.0.tar.gz > /dev/null 2>&1
-    cp rar/*rar /bin > /dev/null 2>&1
-    rm -rf rarlinux*.tar.gz > /dev/null 2>&1
-    rm -rf /tmp/rar > /dev/null 2>&1
 }
 
 function remove_rtorrent() {

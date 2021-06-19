@@ -50,9 +50,11 @@ function _source_setup() {
     fi
 
     ln -s /etc/swizzin/scripts/ /usr/local/bin/swizzin
-    chmod -R 700 /etc/swizzin/scripts
     #shellcheck source=sources/globals.sh
     . /etc/swizzin/sources/globals.sh
+
+    # Set correct permissions on swizzin files
+    bash /etc/swizzin/scripts/update/04-setpermissions.sh
     echo
 }
 _source_setup "$@"
@@ -190,7 +192,7 @@ _os() {
         echo_error "Your distribution ($distribution) is not supported. Swizzin requires Ubuntu or Debian."
         exit 1
     fi
-    if [[ ! $codename =~ ("xenial"|"bionic"|"stretch"|"buster"|"focal") ]]; then
+    if [[ ! $codename =~ ("bionic"|"stretch"|"buster"|"focal") ]]; then
         echo_error "Your release ($codename) of $distribution is not supported."
         exit 1
     fi
@@ -200,18 +202,6 @@ function _preparation() {
     echo_info "Preparing system"
     apt-get install uuid-runtime -yy >> $log 2>&1
     apt_update # Do this because sometimes the system install is so fresh it's got a good stam but it is "empty"
-
-    if [[ $distribution = "Ubuntu" ]]; then
-        echo_progress_start "Enabling required repos"
-        if ! which add-apt-repository > /dev/null; then
-            apt_install software-properties-common
-        fi
-        add-apt-repository universe >> ${log} 2>&1
-        add-apt-repository multiverse >> ${log} 2>&1
-        add-apt-repository restricted -u >> ${log} 2>&1
-        echo_progress_done
-    fi
-
     apt_upgrade
 
     if ! bash /etc/swizzin/scripts/update/10-dependencies.sh; then
@@ -318,12 +308,6 @@ function _check_results() {
         . /etc/swizzin/sources/functions/transmission
         whiptail_transmission_source
     fi
-    if grep -q qbittorrent "$results" || grep -q deluge "$results"; then
-        . /etc/swizzin/sources/functions/libtorrent
-        check_client_compatibility setup
-        whiptail_libtorrent_rasterbar
-        export SKIP_LT=True
-    fi
 
     if [[ $(grep -s rutorrent "$gui") ]] && [[ ! $(grep -s nginx "$results") ]]; then # Check nginx requirement for more than rutorrent
         if (whiptail --title "nginx conflict" --yesno --yes-button "Install nginx" --no-button "Remove ruTorrent" "WARNING: The installer has detected that ruTorrent is to be installed without nginx. To continue, the installer must either install nginx or remove ruTorrent from the packages to be installed." 8 78); then
@@ -393,16 +377,22 @@ function _post() {
         echo_info "You can now use the box command to manage swizzin features, e.g. \`box install nginx panel\`"
     fi
     echo_docs getting-started/box-basics
+    #
+    # Run the bash_completion installer from the update folder
+    bash /etc/swizzin/scripts/update/bash_completion.sh
 }
 
 _run_checks() {
     if [[ $RUN_CHECKS = "true" ]]; then
         echo
         echo_info "Running post-install checks"
-        echo_progress_start "Checking all failed units"
-        systemctl list-units --failed
-        echo_progress_done "listed"
+        # echo_progress_start "Checking all failed units"
+        # systemctl list-units --failed
+        # echo_progress_done "listed"
+
+        bash /etc/swizzin/scripts/box test || return 1
     fi
+
 }
 
 _run_post() {
@@ -432,4 +422,10 @@ _prioritize_results
 _install
 _post
 _run_post
-_run_checks
+_run_checks || {
+    BAD="true"
+}
+
+if [ "$BAD" == "true" ]; then
+    exit 1
+fi

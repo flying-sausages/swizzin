@@ -3,24 +3,20 @@
 function update_nginx() {
     codename=$(lsb_release -cs)
 
-    if [[ $codename =~ ("xenial"|"stretch") ]]; then
+    if [[ $codename == "stretch" ]]; then
         mcrypt=php-mcrypt
     else
         mcrypt=
     fi
-
     #Deprecate nginx-extras in favour of installing fancyindex alone
-    # (unless you use xenial)
-    if [[ ! $codename == "xenial" ]]; then
-        if dpkg -s nginx-extras > /dev/null 2>&1; then
-            apt_remove nginx-extras
-            apt_install nginx libnginx-mod-http-fancyindex
-            apt_autoremove
-            rm $(ls -d /etc/nginx/modules-enabled/*.removed)
-            systemctl reload nginx
-        fi
-    fi
 
+    if dpkg -s nginx-extras > /dev/null 2>&1; then
+        apt_remove nginx-extras
+        apt_install nginx libnginx-mod-http-fancyindex
+        apt_autoremove
+        rm $(ls -d /etc/nginx/modules-enabled/*.removed)
+        systemctl reload nginx
+    fi
     LIST="php-fpm php-cli php-dev php-xml php-curl php-xmlrpc php-json ${mcrypt} php-mbstring php-opcache php-geoip php-xml"
 
     missing=()
@@ -96,10 +92,10 @@ location /rtorrent.downloads {
   include /etc/nginx/snippets/fancyindex.conf;
   auth_basic "What's the password?";
   auth_basic_user_file /etc/htpasswd;
-  
+
   location ~* \.php$ {
 
-  } 
+  }
 }
 EOR
         fi
@@ -118,7 +114,7 @@ location /deluge.downloads {
 
   location ~* \.php$ {
 
-  } 
+  }
 }
 DIN
         fi
@@ -133,6 +129,9 @@ DIN
     if grep -q 'index.html' /etc/nginx/sites-enabled/default; then
         sed -i '/index.html/d' /etc/nginx/sites-enabled/default
     fi
+
+    # fix /etc/nginx/sites-enabled/default to not cause nginx to fail on reloading when there are subdirectories in /etc/nginx/apps like /etc/nginx/apps/authelia
+    sed 's|include /etc/nginx/apps/\*;|include /etc/nginx/apps/\*.conf;|g' -i /etc/nginx/sites-enabled/default
 
     . /etc/swizzin/sources/functions/php
     restart_php_fpm

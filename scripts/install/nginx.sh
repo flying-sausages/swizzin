@@ -36,19 +36,16 @@ if [[ -n $(pidof apache2) ]]; then
     fi
 fi
 
-if [[ $codename =~ ("xenial"|"stretch") ]]; then
+if [[ $codename == "stretch" ]]; then
     mcrypt=php-mcrypt
 else
     mcrypt=
 fi
 
-if [[ $codename == "xenial" ]]; then
-    APT="nginx-extras subversion ssl-cert php-fpm libfcgi0ldbl php-cli php-dev php-xml php-curl php-xmlrpc php-json ${mcrypt} php-mbstring php-opcache php-geoip php-xml"
-else
-    APT="nginx libnginx-mod-http-fancyindex subversion ssl-cert php-fpm libfcgi0ldbl php-cli php-dev php-xml php-curl php-xmlrpc php-json ${mcrypt} php-mbstring php-opcache php-geoip php-xml"
-fi
+APT="nginx libnginx-mod-http-fancyindex subversion ssl-cert php-fpm libfcgi0ldbl php-cli php-dev php-xml php-curl php-xmlrpc php-json ${mcrypt} php-mbstring php-opcache php-geoip php-xml"
 
 apt_install $APT
+mkdir -p /srv
 
 cd /etc/php
 phpv=$(ls -d */ | cut -d/ -f1)
@@ -110,7 +107,7 @@ server {
   server_tokens off;
   root /srv/;
 
-  include /etc/nginx/apps/*;
+  include /etc/nginx/apps/*.conf;
 
   location ~ /\.ht {
     deny all;
@@ -189,8 +186,8 @@ fancyindex_localtime on;
 fancyindex_exact_size off;
 fancyindex_header "/fancyindex/header.html";
 fancyindex_footer "/fancyindex/footer.html";
-#fancyindex_ignore "examplefile.html"; # Ignored files will not show up in the directory listing, but will still be public. 
-#fancyindex_ignore "Nginx-Fancyindex-Theme"; # Making sure folder where files are don't show up in the listing. 
+#fancyindex_ignore "examplefile.html"; # Ignored files will not show up in the directory listing, but will still be public.
+#fancyindex_ignore "Nginx-Fancyindex-Theme"; # Making sure folder where files are don't show up in the listing.
 fancyindex_name_length 255; # Maximum file name length in bytes, change as you like.
 FIC
 sed -i 's/href="\/[^\/]*/href="\/fancyindex/g' /srv/fancyindex/header.html
@@ -209,7 +206,7 @@ done
 
 echo_progress_start "Restarting nginx"
 systemctl restart nginx
-echo_progress_done "Nginx restared"
+echo_progress_done "Nginx restarted"
 
 #shellcheck source=sources/functions/php
 . /etc/swizzin/sources/functions/php
